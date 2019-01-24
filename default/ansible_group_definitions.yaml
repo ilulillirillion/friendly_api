@@ -1,0 +1,54 @@
+---
+# file: .../friendly_api/default/ansible_group_definitions.yaml
+
+
+- name: all
+  regex: '[\s\S]+'
+    
+- name: ansible-servers
+  regex: (?=.*ansible)
+
+- name: sssd-clients
+  regex: '[\s\S]+'
+
+- name: ossec-clients
+  regex: '[\s\S]+'
+
+- name: asep-clients
+  regex: '[\s\S]+'
+
+- name: prod
+  regex: (?=.*(prod|prd))|(?!.*(uat|dev))
+
+- name: ven
+  regex: (?=.*ven)
+
+- name: uat
+  regex: (?=.*uat)
+
+- name: dev
+  regex: (?=.*dev)
+
+- name: bitbucket
+  regex: (?=.*bitb)
+
+- name: confluence
+  regex: (?=.*conf)
+
+- name: crowd
+  regex: (?=.*crowd)
+
+- name: hipchat
+  regex: (?=.*hipc)
+
+- name: jira
+  regex: (?=.*jira)
+
+- name: mysql
+  regex: (?=.*mysql)
+
+- name: teamcenter
+  regex: (?=.*tc)
+
+- name: licensing
+  regex: (?=.*licserv)
