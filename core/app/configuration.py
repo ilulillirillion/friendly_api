@@ -38,7 +38,8 @@ def merge_recursively(*args):
           (isinstance(value, dict) or
           isinstance(merged_data[key], dict))):
         print('Recursively merging <{}>'.format(key))
-        merged_data[key] = recursive_merge(merged_data[key], data_source[key])
+        #merged_data[key] = recursive_merge(merged_data[key], data_source[key])
+        merged_data[key] = merge_recursively(merged_data[key], data_source[key])
       else:
         print('Overwriting key <{}>'.format(key))
         merged_data[key] = data_source[key]

@@ -4,3 +4,5 @@ __*__/*
 **/*.pyc
 local/*
 **/local/*
+*.swp
+**/*.swp

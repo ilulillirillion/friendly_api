@@ -20,18 +20,27 @@ class AnsibleApi():
     return group_definitions
 
   @staticmethod
-  def add_host_to_inventory(network_address, hostname=None):
+  def add_host_to_inventory(network_address, hostname=None, inventory_path=app.configuration['ansible']['inventory_path']):
     if hostname is None:
       hostname = network_address
     group_definitions = AnsibleApi.parse_group_definitions()
-    inventory_path = app.configuration['ansible']['inventory_path']
+    #inventory_path = app.configuration['ansible']['inventory_path']
     for group_definition in group_definitions:
-      if re.compile(group_definition['regex']).match(hostname):
-        hostfile = '{}/{}.ini'.format(inventory_path, group_definition['name'])
+      print('considering group definition: <{}>'.format(group_definition['name']))
+      hostfile = '{}/{}.ini'.format(inventory_path, group_definition['name'])
+      if 'regex' in group_definition and re.compile(group_definition['regex']).match(hostname):
         AnsibleApi.add_host_to_hostfile(hostname, hostfile)
+      elif 'add_exceptions' in group_definition:
+        print('processing add exceptions')
+        for exception in group_definition['add_exceptions']:
+          print('processing exception: <{}>'.format(exception))
+          if exception == hostname:
+            print('exception (<{}>) matches <{}>'.format(exception, hostname))
+            AnsibleApi.add_host_to_hostfile(hostname, hostfile)
   
   @staticmethod
   def add_host_to_hostfile(hostname, hostfile, avoid_duplicates=True):
+    print('adding <{}> to <{}>'.format(hostname, hostfile))
     found_duplicate_host = False
     if not os.path.exists(hostfile):
       with open(hostfile, 'a+') as f:
@@ -55,10 +64,28 @@ class AnsibleApi():
         network_address = request.json['network_address']
       except NameError:
         return jsonify({'status':"missing required parameter: 'network_address'!" })
+      inventory_path = app.configuration['ansible']['inventory_path']
+      if 'inventory_path' in request.json:
+        inventory_path = request.json['inventory_path']
       hostname = None
       if 'hostname' in request.json:
         hostname = request.json['hostname']
-      AnsibleApi.add_host_to_inventory(network_address, hostname)
+      AnsibleApi.add_host_to_inventory(network_address, hostname, inventory_path)
+
+  class RunPlaybook(Resource):
+    def post(self):
+      print('executing playbook')
+      hosts = 'all'
+      playbook = app.configuration['ansible']['default_playbook']
+      inventory = app.configuration['ansible']['inventory_path']
+      if 'playbook' in request.json:
+        playbook = request.json['playbook']
+      if 'inventory_path' in request.json:
+        inventory = request.json['inventory_path']
+      if 'hosts' in request.json:
+        hosts = request.json['hosts']
+      os.system("ansible-playbook {} -i {} -l {},".format(playbook, inventory, hosts))
 
 
 app.api.add_resource(AnsibleApi.AddHost, '/api/ansible', '/api/ansible/add_host', endpoint='/api/ansible/add_host')
+app.api.add_resource(AnsibleApi.RunPlaybook, '/api/ansible/run_playbook', endpoint='/api/ansible/run_playbook')

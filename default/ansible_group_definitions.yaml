@@ -8,8 +8,10 @@
 - name: ansible-servers
   regex: (?=.*ansible)
 
+- name: jenkins-servers
+  regex: (?=.*jenkins)
+
 - name: sssd-clients
-  regex: '[\s\S]+'
 
 - name: ossec-clients
   regex: '[\s\S]+'
