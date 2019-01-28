@@ -20,16 +20,9 @@ class AnsibleApi():
     return group_definitions
 
   @staticmethod
-  def add_host_to_inventory(ip_address, hostname=None, inventory_path=app.configuration['ansible']['inventory_path']):
+  def add_host_to_inventory(host, hostname=None, inventory_path=app.configuration['ansible']['inventory_path']):
     if hostname is None:
-      hostname = ip_address
-    with open('/etc/hosts', 'r') as f:
-      lines = f.readlines()
-    with open('/etc/hosts', 'w') as f:
-      for line in lines:
-        if not line.startswith(ip_address):
-          f.write(line)
-      f.write('{}  {}'.format(ip_address, hostname))
+      hostname = host
     group_definitions = AnsibleApi.parse_group_definitions()
     #inventory_path = app.configuration['ansible']['inventory_path']
     for group_definition in group_definitions:
@@ -68,16 +61,14 @@ class AnsibleApi():
     def post(self):
       print('handling add_host request: <{}>'.format(request))
       try:
-        ip_address = request.json['ip_address']
+        host = request.json['host']
       except NameError:
-        return jsonify({'status':"missing required parameter: 'ip_address'!" })
+        return jsonify({'status':"missing required parameter: 'host'!" })
       inventory_path = app.configuration['ansible']['inventory_path']
       if 'inventory_path' in request.json:
         inventory_path = request.json['inventory_path']
       hostname = None
-      if 'hostname' in request.json:
-        hostname = request.json['hostname']
-      AnsibleApi.add_host_to_inventory(ip_address, hostname, inventory_path)
+      AnsibleApi.add_host_to_inventory(host, inventory_path)
 
   class RunPlaybook(Resource):
     def post(self):
